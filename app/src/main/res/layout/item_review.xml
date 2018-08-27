@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+        <android.support.constraint.ConstraintLayout
+        android:id="@+id/cl_arrow_and_author"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        >
+
+
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:contentDescription="@string/arrow_right"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_author"
+        android:layout_width="wrap_content"
+        android:layout_height="28dp"
+        android:gravity="center"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/arrow"
+        app:layout_constraintStart_toEndOf="@id/arrow"
+        app:layout_constraintTop_toTopOf="@id/arrow"
+        tools:text="Author" />
+    </android.support.constraint.ConstraintLayout>
+
+
+    <TextView
+        android:id="@+id/tv_review"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/border"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/cl_arrow_and_author"
+        app:layout_constraintTop_toBottomOf="@id/cl_arrow_and_author"
+        tools:text="@string/dummy_review" />
+
+</android.support.constraint.ConstraintLayout>
