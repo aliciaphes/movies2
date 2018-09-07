@@ -33,6 +33,12 @@ Create file "keys.xml" in the 'values' folder and add the following key to it:<b
      &nbsp;&nbsp;&nbsp;`...`<br/>
  `</resources>`
 
+
+## Some screenshots:
+![Most popular movies](screenshots/grid_of_most_popular.png)
+![Movie details](screenshots/movie_details.png)
+![Movie reviews](screenshots/movie_reviews.png)
+
 ## Potential improvements:
 Endless scrolling
 
