@@ -73,8 +73,8 @@ public class Movie implements Parcelable {
         rating = in.readDouble();
         releaseDate = in.readString();
 
-        trailers = in.readArrayList(Trailer.class.getClassLoader());
-        reviews  = in.readArrayList(Review.class.getClassLoader());
+        trailers = (ArrayList<Trailer>)in.readArrayList(Trailer.class.getClassLoader());
+        reviews  = (ArrayList<Review>)in.readArrayList(Review.class.getClassLoader());
     }
 
 
