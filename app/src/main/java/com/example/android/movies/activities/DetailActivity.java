@@ -6,21 +6,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.RatingBar;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.example.android.movies.R;
 import com.example.android.movies.adapters.TrailersAdapter;
 import com.example.android.movies.database.MovieViewModel;
 import com.example.android.movies.database.MovieViewModel.GetMovieByIDAsyncTask;
 import com.example.android.movies.database.MovieViewModel.MovieAsyncTask;
+import com.example.android.movies.databinding.ActivityDetailBinding;
 import com.example.android.movies.listeners.MovieCRUDListenerAdapter;
 import com.example.android.movies.models.Movie;
 import com.example.android.movies.models.Review;
@@ -38,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,57 +40,30 @@ import retrofit2.Response;
 import static com.example.android.movies.utils.Utilities.EXTRA_MOVIE_REVIEWS;
 import static com.example.android.movies.utils.Utilities.EXTRA_MOVIE_TITLE;
 
-public class DetailActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
+public class DetailActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
 
     private Movie mCurrentMovie;
-    private TrailersAdapter mTrailersAdapter;
 
     private MovieViewModel mMovieViewModel;
 
-    @BindView(R.id.movie_rating)
-    RatingBar mMovieRatingBar;
-
-    @BindView(R.id.movie_original_title)
-    TextView mTextViewOriginalTitle;
-
-    @BindView(R.id.movie_releasedate)
-    TextView mTextViewReleaseDate;
-
-    @BindView(R.id.movie_synopsis)
-    TextView mTextViewSynopsis;
-
-    @BindView(R.id.trailers_label)
-    TextView mTextViewTrailersLabel;
-
-    @BindView(R.id.movie_poster)
-    ImageView mImageViewMoviePoster;
-
-    @BindView(R.id.rv_trailerlist)
-    RecyclerView mTrailerRecyclerView;
-
-    @BindView(R.id.button_favorite)
-    ToggleButton mToggleButtonFavorite;
-
-    @BindView(R.id.button_see_all)
-    Button mButtonSeeAll;
-
-
+    private ActivityDetailBinding binding;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_detail);
-        ButterKnife.bind(this);
+        binding = ActivityDetailBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view /*R.layout.activity_detail*/);
 
         mMovieViewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
 
         boolean errorRetrievingMovie = false;
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             mCurrentMovie = savedInstanceState.getParcelable(Utilities.EXTRA_MOVIE);
 
-            if(mCurrentMovie != null) {
+            if (mCurrentMovie != null) {
                 displayMovieMainDetails();
                 setCarouselOfTrailers();
                 setSeeAllReviewsButtonLogic();
@@ -108,7 +74,7 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
             Intent existingIntent = getIntent();
             mCurrentMovie = existingIntent.getParcelableExtra(Utilities.EXTRA_MOVIE);
 
-            if(mCurrentMovie != null) {
+            if (mCurrentMovie != null) {
 
                 getTrailersFromNetwork();
 
@@ -120,7 +86,7 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
             }
         }
 
-        if(errorRetrievingMovie) {
+        if (errorRetrievingMovie) {
             Toast.makeText(this, R.string.movie_null, Toast.LENGTH_SHORT).show();
         }
     }
@@ -128,7 +94,7 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
 
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         MovieAsyncTask movieAsyncTask;
-        if(isChecked){
+        if (isChecked) {
             movieAsyncTask = mMovieViewModel.insert();
             movieAsyncTask.setListener(new MovieCRUDListenerAdapter() {
                 @Override
@@ -159,24 +125,24 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
 
         int criterion = Utilities.getCriterionFromSharedPreferences(this);
 
-        mToggleButtonFavorite.setChecked(false); // initially mark it as not favorite
+        binding.buttonFavorite.setChecked(false); // initially mark it as not favorite
 
         // if we're in 'display favorites' mode, just mark it as such
 
-        if(criterion == R.id.favorites){
-            mToggleButtonFavorite.setChecked(true);
-            mToggleButtonFavorite.setOnCheckedChangeListener(this);
+        if (criterion == R.id.favorites) {
+            binding.buttonFavorite.setChecked(true);
+            binding.buttonFavorite.setOnCheckedChangeListener(this);
         } else {
             // search for the movie in the database:
             GetMovieByIDAsyncTask findMovieTask = mMovieViewModel.getMovieByID();
             findMovieTask.setListener(new MovieCRUDListenerAdapter() {
                 @Override
                 public void onPostExecuteConcluded(Movie favoriteMovie) {
-                    if(favoriteMovie != null){
-                        mToggleButtonFavorite.setChecked(true);
+                    if (favoriteMovie != null) {
+                        binding.buttonFavorite.setChecked(true);
                     }
                     // and now is when we set the listener: listen from now on, not before
-                    mToggleButtonFavorite.setOnCheckedChangeListener(DetailActivity.this);
+                    binding.buttonFavorite.setOnCheckedChangeListener(DetailActivity.this);
                 }
             });
             findMovieTask.execute(mCurrentMovie.getId());
@@ -193,53 +159,54 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
         params.put("language", language);
 
         // check connectivity:
-        if (Utilities.isNetworkAvailable(this) && Utilities.isOnline()){
+        if (Utilities.isNetworkAvailable(this) && Utilities.isOnline()) {
 
-          Gson gson = new GsonBuilder()
-                .registerTypeAdapter(new TypeToken<List<Trailer>>(){}.getType(),
-                        new MovieAPIdeserializer<>(Trailer[].class)
-                )
-                .create();
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(new TypeToken<List<Trailer>>() {
+                            }.getType(),
+                            new MovieAPIdeserializer<>(Trailer[].class)
+                    )
+                    .create();
 
-        MovieAPI apiInterface = ServiceGenerator.createService(MovieAPI.class, gson);
+            MovieAPI apiInterface = ServiceGenerator.createService(MovieAPI.class, gson);
 
-        Call<List<Trailer>> call = apiInterface.getTrailers(mCurrentMovie.getId(), params);
-        call.enqueue(new Callback<List<Trailer>>() {
-            @Override
-            public void onResponse(Call<List<Trailer>> call, Response<List<Trailer>> response) {
-                if (response.isSuccessful()) {
-                    if (response.body() != null) {
-                        for (Trailer trailer : response.body()) {
-                            if(trailer.getSite().equals("YouTube")){
-                                mCurrentMovie.addTrailer(trailer);
+            Call<List<Trailer>> call = apiInterface.getTrailers(mCurrentMovie.getId(), params);
+            call.enqueue(new Callback<List<Trailer>>() {
+                @Override
+                public void onResponse(Call<List<Trailer>> call, Response<List<Trailer>> response) {
+                    if (response.isSuccessful()) {
+                        if (response.body() != null) {
+                            for (Trailer trailer : response.body()) {
+                                if (trailer.getSite().equals("YouTube")) {
+                                    mCurrentMovie.addTrailer(trailer);
+                                }
                             }
+                            setCarouselOfTrailers();
                         }
-                        setCarouselOfTrailers();
+                    } else {
+                        Toast.makeText(DetailActivity.this, response.message(), Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(DetailActivity.this, response.message(), Toast.LENGTH_SHORT).show();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<List<Trailer>> call, Throwable t) {
-                Toast.makeText(DetailActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<List<Trailer>> call, Throwable t) {
+                    Toast.makeText(DetailActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
     private void setCarouselOfTrailers() {
         int n = mCurrentMovie.getNumTrailers();
-        if(n > 0){
-            mTextViewTrailersLabel.setText(getString(R.string.trailers, n));
+        if (n > 0) {
+            binding.trailersLabel.setText(getString(R.string.trailers, n));
 
-            mTrailersAdapter = new TrailersAdapter(mCurrentMovie.getTrailers(), DetailActivity.this);
-            mTrailerRecyclerView.setAdapter(mTrailersAdapter);
-            mTrailerRecyclerView.setLayoutManager(new LinearLayoutManager(DetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            mTrailerRecyclerView.setHasFixedSize(true);
+            TrailersAdapter mTrailersAdapter = new TrailersAdapter(mCurrentMovie.getTrailers(), DetailActivity.this);
+            binding.rvTrailerlist.setAdapter(mTrailersAdapter);
+            binding.rvTrailerlist.setLayoutManager(new LinearLayoutManager(DetailActivity.this, LinearLayoutManager.HORIZONTAL, false));
+            binding.rvTrailerlist.setHasFixedSize(true);
         } else {
-            mTextViewTrailersLabel.setVisibility(View.INVISIBLE);
+            binding.trailersLabel.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -253,10 +220,11 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
         params.put("language", language);
 
         // check connectivity:
-        if (Utilities.isNetworkAvailable(this) && Utilities.isOnline()){
+        if (Utilities.isNetworkAvailable(this) && Utilities.isOnline()) {
 
             Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(new TypeToken<List<Review>>(){}.getType(),
+                    .registerTypeAdapter(new TypeToken<List<Review>>() {
+                            }.getType(),
                             new MovieAPIdeserializer<>(Review[].class)
                     )
                     .create();
@@ -290,12 +258,12 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
         }
     }
 
-    private void setSeeAllReviewsButtonLogic(){
+    private void setSeeAllReviewsButtonLogic() {
         int n = mCurrentMovie.getNumReviews();
-        if(n > 0){
-            mButtonSeeAll.setText(getString(R.string.see_reviews, n));
+        if (n > 0) {
+            binding.buttonSeeAll.setText(getString(R.string.see_reviews, n));
         } else {
-            mButtonSeeAll.setVisibility(View.INVISIBLE);
+            binding.buttonSeeAll.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -303,23 +271,23 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
     private void displayMovieMainDetails() {
         setTitle(mCurrentMovie.getTitle());
 
-        mTextViewOriginalTitle.setText(mCurrentMovie.getOriginalTitle());
+        binding.movieOriginalTitle.setText(mCurrentMovie.getOriginalTitle());
 
         formatRating(mCurrentMovie.getRating());
 
-        mTextViewReleaseDate.setText(
+        binding.movieReleasedate.setText(
                 Utilities.formatDate(mCurrentMovie.getReleaseDate())
         );
 
-        mToggleButtonFavorite.setHeight(mMovieRatingBar.getHeight());
+        binding.buttonFavorite.setHeight(binding.movieRating.getHeight());
 
         Picasso.with(this)
                 .load(mCurrentMovie.getPoster())
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_background)
-                .into(mImageViewMoviePoster);
+                .into(binding.moviePoster);
 
-        mTextViewSynopsis.setText(mCurrentMovie.getSynopsis());
+        binding.movieSynopsis.setText(mCurrentMovie.getSynopsis());
 
         // set up logic for the 'heart' button to add/remove movie as favorite:
         setUpLogicForFavoriteMovie();
@@ -329,9 +297,8 @@ public class DetailActivity extends AppCompatActivity implements CompoundButton.
         double ratingOutOfFive = (5 * rating) / 10.0;
         // todo: this looks like it could be potentially improved:
         String stringValue = String.format("%.2f", ratingOutOfFive);
-        mMovieRatingBar.setRating(Float.valueOf(stringValue));
+        binding.movieRating.setRating(Float.valueOf(stringValue));
     }
-
 
 
     public void displayAllReviews(View view) {

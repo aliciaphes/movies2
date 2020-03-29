@@ -5,21 +5,21 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.example.android.movies.R;
 import com.example.android.movies.adapters.ReviewsAdapter;
+import com.example.android.movies.databinding.ActivityReviewsBinding;
 import com.example.android.movies.models.Review;
 import com.example.android.movies.utils.Utilities;
 
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 public class ReviewsActivity extends AppCompatActivity {
 
-    @BindView(R.id.rv_reviewslist)
-    RecyclerView mReviewsRecyclerView;
+    private ActivityReviewsBinding binding;
 
     private Parcelable mListState;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -31,9 +31,10 @@ public class ReviewsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reviews);
 
-        ButterKnife.bind(this);
+        binding = ActivityReviewsBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
 
         if(savedInstanceState != null){
             currentMovieReviews = savedInstanceState.getParcelableArrayList(Utilities.EXTRA_MOVIE_REVIEWS);
@@ -49,11 +50,11 @@ public class ReviewsActivity extends AppCompatActivity {
             setTitle(getString(R.string.reviews_for, currentMovieTitle));
 
             ReviewsAdapter mReviewsAdapter = new ReviewsAdapter(currentMovieReviews, this);
-            mReviewsRecyclerView.setAdapter(mReviewsAdapter);
-            mReviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-            mReviewsRecyclerView.setHasFixedSize(true);
+            binding.rvReviewslist.setAdapter(mReviewsAdapter);
+            binding.rvReviewslist.setLayoutManager(new LinearLayoutManager(this));
+            binding.rvReviewslist.setHasFixedSize(true);
 
-            mLayoutManager = mReviewsRecyclerView.getLayoutManager();
+            mLayoutManager = binding.rvReviewslist.getLayoutManager();
         }
     }
 
@@ -76,8 +77,6 @@ public class ReviewsActivity extends AppCompatActivity {
         if(savedInstanceState != null) {
             mListState = savedInstanceState.getParcelable(Utilities.RECYCLER_VIEW_STATE_KEY);
         }
-
-
     }
 
     @Override

@@ -7,18 +7,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.android.movies.R;
 import com.example.android.movies.activities.DetailActivity;
+import com.example.android.movies.databinding.ItemMovieBinding;
 import com.example.android.movies.models.Movie;
 import com.example.android.movies.utils.Utilities;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
     private Context context;
@@ -34,12 +33,10 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
     @NonNull
     @Override
     public MovieViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        //LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         LayoutInflater inflater = LayoutInflater.from(context);
 
-        View view = inflater.inflate(R.layout.item_movie, parent, false);
-
-        return new MovieViewHolder(view);
+        ItemMovieBinding binding = ItemMovieBinding.inflate(inflater); // R.layout.item_movie
+        return new MovieViewHolder(binding);
     }
 
     @Override
@@ -50,7 +47,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
                 .load(movie.getPoster())
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_background)
-                .into(holder.ivMoviePoster);
+                .into(holder.binding.moviePoster);
     }
 
     @Override
@@ -62,11 +59,12 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     class MovieViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        @BindView(R.id.movie_poster) ImageView ivMoviePoster;
+        ItemMovieBinding binding; // R.id.movie_poster
 
-        private MovieViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
+        private MovieViewHolder(ItemMovieBinding b) {
+            super(b.getRoot());
+            this.binding = b;
+
             itemView.setOnClickListener(this);
         }
 

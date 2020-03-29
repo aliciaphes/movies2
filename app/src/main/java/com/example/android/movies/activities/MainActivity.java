@@ -14,12 +14,13 @@ import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import com.example.android.movies.R;
 import com.example.android.movies.adapters.MoviesAdapter;
 import com.example.android.movies.database.MovieViewModel;
+import com.example.android.movies.databinding.ActivityMainBinding;
 import com.example.android.movies.listeners.MovieListListener;
 import com.example.android.movies.models.Movie;
 import com.example.android.movies.network.MovieAPI;
@@ -35,19 +36,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.rv_movielist)
-    RecyclerView mMovieRecyclerView;
-
-    @BindView(R.id.view_flipper)
-    ViewFlipper mViewFlipper;
+    private ActivityMainBinding binding;
 
     private Parcelable mListState;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -67,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void changeLayout() {
             if(mMovieList.isEmpty()){
-                mViewFlipper.setDisplayedChild(0);
+                binding.viewFlipper.setDisplayedChild(0);
             } else{
-                mViewFlipper.setDisplayedChild(1);
+                binding.viewFlipper.setDisplayedChild(1);
             }
         }
     };
@@ -81,9 +76,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
 
-        ButterKnife.bind(this);
+        setContentView(view); //R.layout.activity_main
 
         // Re-created activities receive the same mMovieViewModel instance created by the first activity:
         mMovieViewModel = ViewModelProviders.of(this).get(MovieViewModel.class);
@@ -94,18 +90,20 @@ public class MainActivity extends AppCompatActivity {
 
         // prepare grid of movies:
         mMovieAdapter = new MoviesAdapter( this, mMovieList);
-        mMovieRecyclerView.setAdapter(mMovieAdapter);
-        mMovieRecyclerView.setLayoutManager(new GridLayoutManager(this, numberOfColumns()));
+        binding.rvMovielist.setAdapter(mMovieAdapter);
+        binding.rvMovielist.setLayoutManager(new GridLayoutManager(this, numberOfColumns()));
 
-        mLayoutManager = mMovieRecyclerView.getLayoutManager();
+        mLayoutManager = binding.rvMovielist.getLayoutManager();
 
         if(savedInstanceState != null){
             mCriterionLabel = savedInstanceState.getString(Utilities.CRITERION_LABEL, getString(Utilities.getDefaultCriterionLabel()));
             setTitle(getString(R.string.app_name) + ": " + mCriterionLabel);
             ArrayList<Movie> movieListFromInstanceState = savedInstanceState.getParcelableArrayList(Utilities.MOVIELIST_KEY);
-            mMovieList.addAll(movieListFromInstanceState);
+            if (movieListFromInstanceState != null) {
+                mMovieList.addAll(movieListFromInstanceState);
+            }
             mMovieAdapter = new MoviesAdapter( this, mMovieList);
-            mMovieRecyclerView.swapAdapter(mMovieAdapter, true);
+            binding.rvMovielist.swapAdapter(mMovieAdapter, true);
             movieListListener.changeLayout();
         } else {
             fetchMovies();
@@ -139,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         //this divider can be changed to adjust the size of the poster
-        int widthDivider = Integer.valueOf(Utilities.POSTER_SIZE);
+        int widthDivider = Integer.parseInt(Utilities.POSTER_SIZE);
         int width = displayMetrics.widthPixels;
         int nColumns = width / widthDivider;
         if(nColumns < 2) return 2;
@@ -185,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
             mMovieList.addAll(mMovieListFromDB);
         }
         mMovieAdapter = new MoviesAdapter( MainActivity.this, mMovieList);
-        mMovieRecyclerView.swapAdapter(mMovieAdapter, true);
+        binding.rvMovielist.swapAdapter(mMovieAdapter, true);
         movieListListener.changeLayout();
     }
 
@@ -277,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                             if (moviesFromNetwork.size() > 0) {
                                 mMovieList.addAll(moviesFromNetwork);
                                 mMovieAdapter = new MoviesAdapter( MainActivity.this, mMovieList);
-                                mMovieRecyclerView.swapAdapter(mMovieAdapter, true);
+                                binding.rvMovielist.swapAdapter(mMovieAdapter, true);
                             }
                             movieListListener.changeLayout();
                         }

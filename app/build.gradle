@@ -6,9 +6,14 @@ repositories {
 
 android {
     compileSdkVersion 28
+
+    viewBinding {
+        enabled = true
+    }
+
     defaultConfig {
         applicationId "com.example.android.movies"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -41,8 +46,6 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.2.0'
     implementation 'com.squareup.picasso:picasso:2.5.2'
-    implementation 'com.jakewharton:butterknife:8.8.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation "android.arch.persistence.room:runtime:$lifecycle_version"
     annotationProcessor "android.arch.persistence.room:compiler:$lifecycle_version"
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"

@@ -7,17 +7,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.android.movies.R;
+import com.example.android.movies.databinding.ItemReviewBinding;
 import com.example.android.movies.models.Review;
 
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+
 
 public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsViewHolder> {
 
@@ -34,23 +31,24 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
     public ReviewsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        View view = inflater.inflate(R.layout.item_review, parent, false);
-
-        return new ReviewsViewHolder(view);
+        ItemReviewBinding binding = ItemReviewBinding.inflate(inflater); // R.layout.item_review
+        return new ReviewsViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ReviewsViewHolder holder, int position) {
         Review review = mReviewsList.get(position);
 
-        holder.tvReviewAuthor.setText(context.getString(R.string.review_by, review.getAuthor()));
+        holder.binding.tvAuthor.setText(context.getString(R.string.review_by, review.getAuthor()));
 
-        holder.ivArrow.setBackground(ContextCompat.getDrawable(context, R.drawable.ic_arrow_right));
+        holder.binding.arrow.setBackground(ContextCompat.getDrawable(context, R.drawable.ic_arrow_right));
 
-        holder.tvReviewContent.setText(review.getReviewContent());
+        holder.binding.tvReview.setText(review.getReviewContent());
 
         holder.toggleReviewVisibility(review.getContentVisibility());
     }
+
+
 
 
     @Override
@@ -60,19 +58,13 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
         else return 0;
     }
 
-    public class ReviewsViewHolder extends RecyclerView.ViewHolder{
+    public class ReviewsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        @BindView(R.id.tv_author)
-        TextView tvReviewAuthor;
+        ItemReviewBinding binding;
 
-        @BindView(R.id.tv_review)
-        TextView tvReviewContent;
 
-        @BindView(R.id.arrow)
-        ImageView ivArrow;
-
-        @OnClick(R.id.cl_arrow_and_author)
-        public void showContentOfReview(){
+        @Override
+        public void onClick(View v) { //R.id.cl_arrow_and_author
             int position = getAdapterPosition();
             Review review = mReviewsList.get(position);
             boolean contentVisibility = review.getContentVisibility();
@@ -82,20 +74,21 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewsV
         }
 
 
-
         private void toggleReviewVisibility(boolean displaying){
             if (!displaying) {
-                ivArrow.setBackground(ContextCompat.getDrawable(context, R.drawable.ic_arrow_right));
-                tvReviewContent.setVisibility(View.GONE);
+                binding.arrow.setBackground(ContextCompat.getDrawable(context, R.drawable.ic_arrow_right));
+                binding.tvReview.setVisibility(View.GONE);
             } else {
-                ivArrow.setBackground(ContextCompat.getDrawable(context, R.drawable.ic_arrow_down));
-                tvReviewContent.setVisibility(View.VISIBLE);
+                binding.arrow.setBackground(ContextCompat.getDrawable(context, R.drawable.ic_arrow_down));
+                binding.tvReview.setVisibility(View.VISIBLE);
             }
         }
 
-        private ReviewsViewHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
+        private ReviewsViewHolder(ItemReviewBinding b) {
+            super(b.getRoot());
+            this.binding = b;
+
+            itemView.setOnClickListener(this);
         }
     }
 }

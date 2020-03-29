@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.android.movies.R;
+import com.example.android.movies.databinding.ItemTrailerBinding;
 import com.example.android.movies.models.Trailer;
 import com.example.android.movies.utils.Utilities;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -25,9 +26,6 @@ import com.google.android.youtube.player.YouTubeThumbnailView;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.TrailerViewHolder>{
 
@@ -52,9 +50,8 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
     public TrailerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-        View view = inflater.inflate(R.layout.item_trailer, parent, false);
-
-        return new TrailerViewHolder(view);
+        ItemTrailerBinding binding = ItemTrailerBinding.inflate(inflater); // R.layout.item_trailer
+        return new TrailerViewHolder(binding);
     }
 
 
@@ -65,9 +62,9 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
         Trailer trailer = mTrailerList.get(position);
         final String videoKey = trailer.getKey();
 
-        holder.youTubeThumbnailView.setTag(videoKey);
+        holder.binding.thumbnail.setTag(videoKey);
 
-        holder.youTubeThumbnailView.initialize(youTubeAPIkey, new YouTubeThumbnailView.OnInitializedListener(){
+        holder.binding.thumbnail.initialize(youTubeAPIkey, new YouTubeThumbnailView.OnInitializedListener(){
 
             @Override
             public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, final YouTubeThumbnailLoader thumbnailLoader) {
@@ -110,16 +107,13 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
     class TrailerViewHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener, YouTubePlayer.OnInitializedListener {
 
-            @BindView(R.id.thumbnail)
-            YouTubeThumbnailView youTubeThumbnailView;
+        ItemTrailerBinding binding;
 
+        private TrailerViewHolder(ItemTrailerBinding b) {
+            super(b.getRoot());
+            binding = b;
 
-        private TrailerViewHolder(View itemView) {
-            super(itemView);
-
-            ButterKnife.bind(this, itemView);
-
-            youTubeThumbnailView.getLayoutParams().height = Integer.valueOf(Utilities.POSTER_SIZE);
+            binding.thumbnail.getLayoutParams().height = Integer.valueOf(Utilities.POSTER_SIZE);
 
             itemView.setOnClickListener(this);
         }
